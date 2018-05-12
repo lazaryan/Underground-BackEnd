@@ -8,6 +8,9 @@ input:focus,
 button:focus {
   outline: none;
 }
+.none{
+  display: none;
+}
 .add-visit {
   width: 963px;
   height: 400px;
