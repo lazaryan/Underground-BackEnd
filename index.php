@@ -1,3 +1,36 @@
+<?php
+$db_host     = "localhost";
+$db_username = "root";
+$db_password = "";
+$db_name     = "unced";
+$db_charset  = "utf8";
+
+$con    = mysql_connect($db_host, $db_username, $db_password);
+$db     = mysql_select_db($db_name);
+mysql_set_charset($db_charset);
+
+if (!$con || !$db) {
+  mysql_error();
+}
+
+$result = mysql_query("SELECT * FROM unced");
+
+$i=0;
+while ($row = mysql_fetch_array($result)) {
+  $name[]       =$row['person'];
+  $time[]       =$row['time'];
+  $timestatus[] =$row['timestatus'];
+
+  if (empty($name[$i])) {
+    $name[$i] = "";
+    $time[$i] = "";
+    $timestatus[$i] = "";
+  }
+
+  $i++;
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,9 +84,8 @@
         </div>
     </div>
     <!--Popup окно-->
-    <form action="" method="POST">
     <div class="add-visit _none js-add-visit">
-    	<input class="_none" id="number_table" name="number_table">
+    	<span class="_none" id="number_table"></span>
        	<header class="header_popup">
        	    <span class="close_popup js-close_popup"></span>
        	</header>
@@ -62,7 +94,7 @@
        	        <p class="popup__name_text">Введите имя посетителя</p>
        	    </label>
        	    <div class="enter-name_size">
-       	        <input type="text" id="enter_name" class="enter-name" name="name">
+       	        <input type="text" id="enter_name" class="enter-name">
        	    </div>
        	</div>
        	<div class="popup__enter_date">
@@ -70,30 +102,39 @@
        	        <label for="enter-time" class="enter-time_message">
        	            <p class="enter-date_text">введите время</p>
        	        </label>
-       	        <input type="number" id="enter_time" class="enter_add-time" min="1" max="10" value="1" name="time">
+       	        <input type="number" id="enter_time" class="enter_add-time" min="1" max="10" value="1">
        	    </div>
        	    <div class="enter-date">
-       	        <button class="enter-date_click js-enter-date_click">
+       	        <button type="submit" class="enter-date_click js-enter-date_click">
        	            <p class="enter-date_text js-enter-date_click">Подтвердить</p>
        	        </button>
        	    </div>
        	</div>
     </div>
-    </form>
 
     <!--Основа сайта-->
+    <form action="" method="POST">
     <div class="content js-content">  
     	<!--Столы-->
-    	<!--Стол1-->
-        <form action="" method="POST">
+        <?php  for ($a=0; $a<count($name);$a++):?>
+        <!--Стол№<?=$a+1?>-->
     	<div class="table_pos">
-			<div class="table table-i table_left js-table" id="table_1">
-				<span class="js-prise_table _none" data-value="500" data-hours="0"></span>
+        <?php if ($a % 2 == 0){ ?>
+			<div class="table table-i table_left js-table" id="table_<?=$a+1?>">
+        <?php } else{ ?>
+            <div class="table table-i table_right js-table" id="table_<?=$a+1?>">
+        <?php }; ?>
+                <span class="js-prise_table _none" data-value="500"></span>
+				<span class="js-house_table _none"><?=$timestatus[$a]?></span>
+            <?php if (empty($name[$a])){ ?>
 				<div class="table table_cap table_cap__number js-table_cap">
-    				Стол №1
+            <?php } else{ ?>
+                <div class="table table_cap table_cap__number _none js-table_cap">
+            <?php }; ?>
+    				Стол №<?=$a+1?>
     			</div>
 				<div class="table__number">
-					<p class="table__number-i">Стол №1</p>
+					<p class="table__number-i">Стол №<?=$a+1?></p>
 				</div>
 				<div class="table__info">
 					<div class="table__info-i table__info_left">
@@ -101,7 +142,7 @@
 							<p class="table__info_name-i">Клиент</p>
 						</div>
 						<div class="table__info_value">
-							<span class="table__info_value-i js-table__info_name"></span>
+							<span class="table__info_value-i js-table__info_name"><?=$name[$a]?></span>
 						</div>
 					</div>
 					<div class="table__info-i table__info_right">
@@ -109,7 +150,7 @@
 							<p class="table__info_name-i">Таймер</p>
 						</div>
 						<div class="table__info_value">
-							<span class="table__info_value-i js-table__info_time" id="table-time_1"></span>
+							<span class="table__info_value-i js-table__info_time" id="table-time_<?=$a+1?>"><?=$time[$a]?></span>
 						</div>
 					</div>
 				</div>
@@ -121,29 +162,30 @@
 							</div>
 							<div class="table__extend_bth js-table__extend_bth">
 								<div class="table__extend_item js-table__extend_item">
-									<button class="table__extend_item-bth js-table__extend_item" data-value="1">на 1 час</button>
+									<button type="submit" class="table__extend_item-bth js-table__extend_item" data-value="1">на 1 час</button>
 								</div>
 								<div class="table__extend_item js-table__extend_item">
-									<button class="table__extend_item-bth js-table__extend_item" data-value="2">на 2 часа</button>
+									<button type="submit" class="table__extend_item-bth js-table__extend_item" data-value="2">на 2 часа</button>
 								</div>
 								<div class="table__extend_item js-table__extend_item">
-									<button class="table__extend_item-bth js-table__extend_item" data-value="3">на 3 часа</button>
+									<button type="submit" class="table__extend_item-bth js-table__extend_item" data-value="3">на 3 часа</button>
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="table__change-i table__change_remove">
-						<button class="table__change_bth table__remove table__change_text js-table__remove">
-							Убрать
-						</button>
+                        <button type="submit" class="table__change_bth table__remove table__change_text js-table__remove">Убрать</button>
 					</div>
 				</div>
 			</div>
 		</div>
-        </form>
+
+        <?php endfor; ?>
+    </form>
 	</div>	
     <!--Скрипты-->
     <script type="text/javascript" src="js/clock.min.js"></script>
     <script type="text/javascript" src="js/main.min.js"></script>
 </body>
 </html>
+<?php mysql_close();?>
