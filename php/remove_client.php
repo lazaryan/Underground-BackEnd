@@ -27,7 +27,7 @@ $row = mysql_fetch_array($result)
 
 mysql_query(" INSERT INTO Otchet(person, time, summa) VALUES ('$name','$time','$sum')");
 
-mysql_query("UPDATE unced SET person=0, time=0, timestatus=0 WHERE id=$number");
+mysql_query("UPDATE unced SET person='', time='', timestatus='' WHERE id=$number");
 /**
  * файл для удаления посетителя
  * параметры передаются методом POST
