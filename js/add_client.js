@@ -233,7 +233,10 @@ AddClient.prototype = {
  */
 
 	enterData: function enterData(than) {
-		var obj = 'number=' + than.Number + '&name=' + than.Name + '&hours=' + than.Hours;
+		var date_now = new Date();
+		var date = date_now.getHours() + ':' + date_now.getMinutes() + ':' + date_now.getSeconds();
+		console.log(date || 123);
+		var obj = 'number=' + than.Number + '&name=' + than.Name + '&hours=' + than.Hours + '&date="' + date + '"';
 
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', '../php/add_client.php', true);
