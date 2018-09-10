@@ -65,6 +65,7 @@ Tabel.prototype = {
 		this._create = {
 			cap: {
 				setting: {
+					type: 'button',
 					className: 'table__cap',
 					text: '\u0421\u0442\u043E\u043B \u2116 ' + this.Number,
 					generate: !this._active,
@@ -285,15 +286,15 @@ Tabel.prototype = {
 	},
 	startTable: function startTable() {
 		var time = new Date();
-		var minutes_order = time.getHours() * 60 + time.getMinutes();
+		var seconds_order = time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds();
 		var order = this.order.split(':').reduce(function (s, c) {
 			return s * 60 + +c;
-		});
+		}, 0);
 
-		var minutes = this.Hours * 60 + order - minutes_order;
+		var seconds = this.Hours * 3600 + order - seconds_order;
 
-		if (minutes > 0) {
-			this.controller.startTimer(this.Number, minutes);
+		if (seconds > 0 && order < seconds_order) {
+			this.controller.startTimer(this.Number, seconds);
 		} else {
 			this.showPay(this);
 		}
@@ -372,6 +373,13 @@ Tabel.prototype = {
 	showPay: function showPay(than) {
 		var obj = 'number=' + than.Number;
 
+		than.controller.showPay(than.Number, than.Hours, than.prise);
+
+		if (than._active_add_hours) {
+			than._elements._add_hours_checked.setAttribute('style', 'transform: scaleY(0)');
+			than._active_add_hours = false;
+		}
+
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', '../php/remove_client.php', true);
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -382,8 +390,6 @@ Tabel.prototype = {
 
 			if (xhr.status != 200) {
 				throw new Error(xhr.statusText);
-			} else {
-				than.controller.showPay(than.Number, than.Hours, than.prise);
 			}
 		};
 	},
@@ -410,6 +416,8 @@ Tabel.prototype = {
 		than.showAddHours(than);
 		than.Hours += +value;
 
+		than.controller.addHours(than.number, +value);
+
 		var obj = 'number=' + than.Number + '&value=' + than.Hours;
 
 		var xhr = new XMLHttpRequest();
@@ -422,8 +430,6 @@ Tabel.prototype = {
 
 			if (xhr.status != 200) {
 				throw new Error(xhr.statusText);
-			} else {
-				than.controller.addHours(than.number, +value);
 			}
 		};
 	},

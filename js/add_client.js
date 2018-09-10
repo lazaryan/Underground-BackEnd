@@ -233,10 +233,11 @@ AddClient.prototype = {
  */
 
 	enterData: function enterData(than) {
-		var date_now = new Date();
-		var date = date_now.getHours() + ':' + date_now.getMinutes() + ':' + date_now.getSeconds();
-		console.log(date || 123);
-		var obj = 'number=' + than.Number + '&name=' + than.Name + '&hours=' + than.Hours + '&date="' + date + '"';
+		var now = new Date();
+		var date = than.formatTime(now.getHours()) + ':' + than.formatTime(now.getMinutes()) + ':' + than.formatTime(now.getSeconds());
+		var obj = 'number=' + than.Number + '&name=' + than.Name + '&hours=' + than.Hours + '&date=' + date;
+
+		than.controller.enterData(than.Number, than.Name, than.Hours);
 
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', '../php/add_client.php', true);
@@ -248,8 +249,6 @@ AddClient.prototype = {
 
 			if (xhr.status != 200) {
 				throw new Error(xhr.statusText);
-			} else {
-				than.controller.enterData(than.Number, than.Name, than.Hours);
 			}
 		};
 	},
@@ -305,6 +304,17 @@ AddClient.prototype = {
 		than.Hours = text;
 
 		than._elements._hours.value = than.Hours;
+	},
+
+
+	/**
+ * check number's  format
+ * @param {Number} n - number
+ * @return two-digit number
+ */
+
+	formatTime: function formatTime(n) {
+		return n > 9 ? n : '0' + n;
 	},
 
 

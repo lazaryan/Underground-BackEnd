@@ -23,6 +23,8 @@ Controller.prototype = {
 	_popupAddClient: undefined,
 
 	init: function init(content, tabels) {
+		var _this = this;
+
 		if (content) {
 			this._init_content(content);
 		} else {
@@ -31,10 +33,10 @@ Controller.prototype = {
 
 		if (tabels) {
 			if (tabels instanceof Array) {
-				for (var i = 0; i < tabels.length; i++) {
-					this._count_tabels++;
-					this._init_tabels(this._count_tabels, tabels[i], this);
-				}
+				tabels.forEach(function (tabel) {
+					_this._count_tabels++;
+					_this._init_tabels(_this._count_tabels, tabel, _this);
+				});
 			} else {
 				this._init_tabels(this._count_tabels, tabels, this);
 			}
@@ -84,15 +86,15 @@ Controller.prototype = {
 		if (name) {
 			this.tabels[number].activeTable(name, hours);
 
-			this.startTimer(number, hours * 60);
+			this.startTimer(number, hours * 3600);
 
 			this._popupAddClient.removePopup(this._popupAddClient);
 			this._popupAddClient = undefined;
 			this._activePopupAddClient = false;
 		}
 	},
-	startTimer: function startTimer(number, minutes) {
-		this.clock[number].addMinutes(minutes);
+	startTimer: function startTimer(number, seconds) {
+		this.clock[number].addSeconds(seconds);
 		this.clock[number].start();
 	},
 	showPay: function showPay(number, hours, prise) {

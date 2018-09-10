@@ -13,6 +13,7 @@
 function Clock(controller, id, minutes) {
 	this.minutes = 0;
 	this.hours = 0;
+	this.second = 0;
 	this.id = undefined;
 	this.controller = undefined;
 	this.timer = undefined;
@@ -33,9 +34,9 @@ Clock.prototype = {
  */
 
 	init: function init(controller, id) {
-		var minutes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+		var second = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
-		this.addMinutes(minutes);
+		this.addSeconds(second);
 
 		this.controller = controller ? controller : this.controller;
 		this.id = id ? id : this.id;
@@ -49,14 +50,15 @@ Clock.prototype = {
  * @param {Number} minutes - how many minutes the table will be ordered
  */
 
-	addMinutes: function addMinutes() {
-		var minutes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	addSeconds: function addSeconds() {
+		var seconds = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
-		this.hours = Math.floor(minutes / 60);
-		this.minutes = minutes % 60;
+		this.second = seconds % 60;
+		this.minutes = Math.floor(seconds / 60) % 60;
+		this.hours = Math.floor(seconds / 3600);
 	},
 	getHours: function getHours(hours) {
-		this.hours += hours;
+		this.hours = +this.hours + hours;
 	},
 
 
@@ -70,7 +72,7 @@ Clock.prototype = {
 		this.changeTime();
 		this.timer = setInterval(function () {
 			return _this.changeTime();
-		}, 60000);
+		}, 1000);
 	},
 
 
@@ -92,6 +94,7 @@ Clock.prototype = {
 
 		this.minutes = 0;
 		this.hours = 0;
+		this.second = 0;
 	},
 
 
@@ -102,19 +105,26 @@ Clock.prototype = {
 	changeTime: function changeTime() {
 		this.hours = +this.hours;
 		this.minutes = +this.minutes;
+		this.second = +this.second;
 
-		if (this.hours && this.minutes == 0) {
-			this.minutes = 59;
-			this.hours--;
+		if (this.second == 0) {
+			this.second = 59;
+			if (this.minutes == 0) {
+				this.hours--;
+				this.minutes = 59;
+			} else {
+				this.minutes--;
+			}
 		} else {
-			this.minutes--;
+			this.second--;
 		}
 
-		if (this.hours || this.minutes) {
+		if (this.hours || this.minutes || this.second) {
 			this.hours = this.formatTime(this.hours);
 			this.minutes = this.formatTime(this.minutes);
+			this.second = this.formatTime(this.second);
 
-			this.controller.changeTime(this.id, this.hours + ":" + this.minutes);
+			this.controller.changeTime(this.id, this.hours + ":" + this.minutes + ":" + this.second);
 		} else {
 			this.controller.finishTimer(this.id);
 		}
@@ -122,8 +132,9 @@ Clock.prototype = {
 	getTime: function getTime() {
 		this.hours = this.formatTime(+this.hours);
 		this.minutes = this.formatTime(+this.minutes);
+		this.second = this.formatTime(+this.second);
 
-		return this.hours + ":" + this.minutes;
+		return this.hours + ":" + this.minutes + ":" + this.second;
 	},
 
 
