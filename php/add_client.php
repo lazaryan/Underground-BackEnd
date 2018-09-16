@@ -18,7 +18,7 @@ $name = strip_tags(trim($_POST['name']));
 $date = strip_tags(trim($_POST['date']));
 $hours = strip_tags(trim($_POST['hours']));
 
-mysql_query("UPDATE unced SET person='$name', time=$date, timestatus='$hours' WHERE id=$number");
+mysql_query("UPDATE unced SET person='$name', time='$date', timestatus=$hours WHERE id=$number");
 
 /**
  * файл для добавления новых клиентов

@@ -414,11 +414,12 @@ Tabel.prototype = {
 	addHours: function addHours(e, than) {
 		var value = e.target.dataset.value;
 		than.showAddHours(than);
-		than.Hours += +value;
+		than.Hours = +than.Hours + +value;
+
 
 		than.controller.addHours(than.number, +value);
 
-		var obj = 'number=' + than.Number + '&value=' + than.Hours;
+		var obj = 'number=' + than.Number + '&value=' + +than.Hours;
 
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', '../php/add_hour.php', true);

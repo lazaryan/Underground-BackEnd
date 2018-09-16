@@ -14,26 +14,18 @@ if (!$con || !$db) {
 }
 
 $number= strip_tags(trim($_POST['number']));
-$ret='';
 
-$result = mysql_query("SELECT person, time, timestatus, prise FROM unced WHERE id=$number");
+$result = mysql_query("SELECT * FROM unced WHERE id=$number");
 
-$row = mysql_fetch_array($result)
-  $name=$row['person'];
-  $time=$row['time'];
-  $timestatus=$row['timestatus'];
-  $prise=$row['prise'];
-  $sum=$timestatus*$prise;
+$row = mysql_fetch_array($result);
+$name=$row['person'];
+$time=$row['time'];
+$timestatus=$row['timestatus'];
+$prise=$row['prise'];
+$sum=$timestatus*$prise;
 
-mysql_query(" INSERT INTO Otchet(person, time, summa) VALUES ('$name','$time','$sum')");
+mysql_query(" INSERT INTO Otchet (person, time, summa) VALUES ('$name','$time', $sum)");
 
-mysql_query("UPDATE unced SET person='', time='', timestatus='' WHERE id=$number");
-/**
- * файл для удаления посетителя
- * параметры передаются методом POST
- * параметры:
- * number - номер стола
- */
-echo $number;
- mysql_close();
+mysql_query("UPDATE unced SET person=null, time=null, timestatus=0 WHERE id=$number");
+mysql_close();
 ?>
