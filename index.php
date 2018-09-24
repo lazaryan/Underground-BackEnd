@@ -44,17 +44,22 @@ while ($row = mysql_fetch_array($result))
 
     <title>Underground</title>
     
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/table.css">
     <noscript id="deferred-styles">
-        <link rel="stylesheet" type="text/css" href="css/main.css">
-        <link rel="stylesheet" type="text/css" href="css/table.css">
         <link rel="stylesheet" type="text/css" href="css/popup.css">
         <link rel="stylesheet" type="text/css" href="css/popup_prise.css">
     </noscript>
 </head>
 <body class="body">
     <!--Основа сайта-->
-    <div class="content" id="content"></div>	
+    <div class="content" id="content">
+        <header class="header">
+            <a href="./report.html" target="_blank" class="header__link">Отчет</a>
+        </header>
+    </div>	
     <!--Скрипты-->
+    <script src="js/create_object.js"></script>
     <script src="js/apend_styles.js"></script>
     <script src="js/add_client.js"></script>
     <script src="js/clock.js"></script>

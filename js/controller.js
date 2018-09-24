@@ -12,6 +12,16 @@ function Controller(_ref) {
 	this.clock = [];
 	this.pay = [];
 
+	this.setting = {
+		hours: {
+			min: 1,
+			max: 8
+		},
+		name: {
+			maxlength: 35
+		}
+	};
+
 	this.init(content, tabels);
 
 	return this;
@@ -98,9 +108,14 @@ Controller.prototype = {
 		this.clock[number].start();
 	},
 	showPay: function showPay(number, hours, prise) {
+		var minutes = +hours * 60 - this.clock[number].getMinutes();
+		var prise_minute = (prise / 60).toFixed(4);
+
 		this.pay[number] = new Pay(this, number);
 		this.pay[number].createPopup();
-		this.pay[number].addPrise(prise, hours);
+		this.pay[number].addPrise(prise_minute * minutes, hours);
+
+		this.tabels[number].sendClient(prise_minute * minutes);
 
 		this.disactiveTable(number);
 	},
@@ -116,8 +131,11 @@ Controller.prototype = {
 
 		this.showPay(number, hours, prise);
 	},
-	addHours: function addHours(number, hours) {
-		this.clock[number].getHours(hours);
+	changeHours: function changeHours(number, hours) {
+		this.clock[number].changeHours(hours);
 		this.tabels[number].changeTimer(this.clock[number].getTime());
+	},
+	addHours: function addHours(number, hours) {
+		this.clock[number].addHours(hours);
 	}
 };

@@ -15,7 +15,11 @@ function AddClient(controller, id) {
 	this.hours = 1;
 
 	this._create = {};
+	this._elements = {};
 	this._body = undefined;
+
+	this._hour_id = ['Час', 'Часа', 'Часов'];
+	this._style_button_disabled = 'background-color: #DFDFDF; color: #C0BEBE; cursor: default';
 
 	this.init(controller, id);
 
@@ -67,90 +71,82 @@ AddClient.prototype = {
 			header: {
 				setting: {
 					type: 'header',
-					className: 'add-client__header',
+					attr: { class: 'add-client__header' },
 					elements: {
 						type: 'button',
-						className: 'add-client__close',
-						save: {
-							active: true,
-							name: '_close'
-						},
-						on: {
-							active: true,
-							type: 'click',
-							callback: this.closePopup
-						}
+						save_name: '_close',
+						attr: { class: 'add-client__close' },
+						on: { 'click': this.closePopup.bind(this) }
 					}
 				}
 			},
 			body: {
 				setting: {
-					className: 'add-client__body',
+					attr: { class: 'add-client__body' },
 					elements: [{
-						className: 'add-client__enter-name',
+						attr: { class: 'add-client__enter-name' },
 						elements: [{
 							type: 'label',
-							label_for: 'inputName',
-							className: 'enter-name__title',
-							text: 'Введите имя посетителя'
+							text: 'Введите имя посетителя',
+							attr: {
+								class: 'enter-name__title',
+								for: 'inputName'
+							}
 						}, {
-							className: 'enter-name__block',
+							attr: { class: 'enter-name__block' },
 							elements: {
 								type: 'input',
-								input_type: 'text',
-								className: 'enter-name__input',
-								id_element: 'inputName',
-								maxlength: 30,
-								save: {
-									active: true,
-									name: '_name'
+								save_name: '_name',
+								attr: {
+									placeholder: 'Введите имя',
+									class: 'enter-name__input',
+									id: 'inputName',
+									type: 'text',
+									maxlength: this.controller.setting.name.maxlength
 								},
 								on: {
-									active: true,
-									type: 'input',
-									param: true,
-									callback: this.inputName
+									'input': this.inputName.bind(this),
+									'keyup': this.checkKeyup.bind(this)
 								}
 							}
 						}]
 					}, {
-						className: 'add-client__enter-hours',
+						attr: { class: 'add-client__enter-hours' },
 						elements: [{
 							type: 'label',
-							className: 'enter-time__title',
-							text: 'Введите время'
+							text: 'Введите время',
+							attr: { class: 'enter-time__title' }
 						}, {
 							type: 'input',
-							input_type: 'number',
-							className: 'enter-time__input',
-							id_element: 'inputHours',
-							input_min: 1,
-							input_max: 10,
-							value: 1,
-							save: {
-								active: true,
-								name: '_hours'
+							save_name: '_hours',
+							attr: {
+								class: 'enter-time__input',
+								id: 'inputHours',
+								type: 'number',
+								min: this.controller.setting.hours.min,
+								max: this.controller.setting.hours.max,
+								value: this.controller.setting.hours.min
 							},
 							on: {
-								active: true,
-								type: 'input',
-								param: true,
-								callback: this.inputHours
+								'input': this.inputHours.bind(this),
+								'keyup': this.checkEnter.bind(this)
 							}
+						}, {
+							type: 'span',
+							text: 'Час',
+							save_name: '_hours_text',
+							attr: { class: 'enter-time__hours' }
 						}]
 					}, {
 						type: 'button',
-						className: 'add-client__enter',
 						text: 'Подтвердить',
-						save: {
-							active: true,
-							name: '_enter'
+						save_name: '_enter',
+						attr: {
+							class: 'add-client__enter',
+							style: this._style_button_disabled,
+							disabled: 'disabled'
 						},
-						on: {
-							active: true,
-							type: 'click',
-							callback: this.enterData
-						}
+						on: { 'click': this.enterData.bind(this) }
 					}]
 				}
 			}
@@ -167,37 +163,41 @@ AddClient.prototype = {
  */
 
 	createPopup: function createPopup() {
+		var _this = this;
+
 		this.Body = document.createElement('div');
 		this.Body.className = 'add-client';
 
 		if (this._create) {
-			for (var elem in this._create) {
-				this.createElement(this.Body, this._create[elem].setting);
-			}
+			Object.keys(this._create).map(function (el) {
+				return _this._create[el];
+			}).forEach(function (el) {
+				createElement(_this.Body, el.setting, _this._elements);
+			});
 		}
 
 		document.querySelector('body').appendChild(this.Body);
+
+		this._elements._name.focus();
 	},
 
 
 	/**
  * remove this popup
- * @param {Object} than - this Object
  */
 
-	removePopup: function removePopup(than) {
-		document.querySelector('body').removeChild(than.Body);
+	removePopup: function removePopup() {
+		document.querySelector('body').removeChild(this.Body);
 	},
 
 
 	/**
  * close this popup
- * @param {Object} than - this Object
  */
 
-	closePopup: function closePopup(than) {
-		than.controller.closeAddClient(than.number);
-		than.removePopup(than);
+	closePopup: function closePopup() {
+		this.controller.closeAddClient(this.number);
+		this.removePopup();
 	},
 
 
@@ -205,12 +205,60 @@ AddClient.prototype = {
  * the process of entering username
  * @param
  * {Object} e - received data
- * {Object} than - this Object
  */
 
-	inputName: function inputName(e, than) {
-		than.format_name(e.target.value, than);
-		than.controller.changeDataTable(than.Number, than.Name, than.Hours);
+	inputName: function inputName(e) {
+		this.format_name(e.target.value);
+
+		if (this.Name && this._elements._enter.disabled) {
+			this._elements._enter.disabled = '';
+			this._elements._enter.style = '';
+		}
+
+		if (!this.Name) {
+			this._elements._enter.disabled = 'disabled';
+			this._elements._enter.style = this._style_button_disabled;
+		}
+
+		this.controller.changeDataTable(this.Number, this.Name, this.Hours);
+	},
+	checkKeyup: function checkKeyup(e) {
+		this.checkEnter(e);
+		this.checkArrow(e);
+	},
+	checkEnter: function checkEnter(e) {
+		if (e.code == 'Enter' && this.Name) {
+			this.enterData();
+		}
+	},
+	checkArrow: function checkArrow(e) {
+		if (e.code == 'ArrowUp') {
+			this.upHours();
+		}
+
+		if (e.code == 'ArrowDown') {
+			this.downHours();
+		}
+	},
+	upHours: function upHours() {
+		if (this.Hours < this._elements._hours.max) {
+			this.Hours++;
+			this._elements._hours.value = this.Hours;
+
+			this.showHoursText();
+
+			this.controller.changeDataTable(this.Number, this.Name, this.Hours);
+		}
+	},
+	downHours: function downHours() {
+		if (this.Hours > this._elements._hours.min) {
+			this.Hours--;
+			this._elements._hours.value = this.Hours;
+
+			this.showHoursText();
+
+			this.controller.changeDataTable(this.Number, this.Name, this.Hours);
+		}
 	},
 
 
@@ -218,26 +266,40 @@ AddClient.prototype = {
  * the process of entering hours
  * @param
  * {Object} e - received data
- * {Object} than - this Object
  */
 
-	inputHours: function inputHours(e, than) {
-		than.format_time(e.target.value, than);
-		than.controller.changeDataTable(than.Number, than.Name, than.Hours);
+	inputHours: function inputHours(e) {
+		this.format_time(e.target.value);
+
+		this.showHoursText();
+
+		this.controller.changeDataTable(this.Number, this.Name, this.Hours);
+	},
+	showHoursText: function showHoursText() {
+		if (this.Hours == 0 || this.Hours > 5) {
+			this._elements._hours_text.innerText = this._hour_id[2];
+		} else if (this.Hours == 1) {
+			this._elements._hours_text.innerText = this._hour_id[0];
+		} else {
+			this._elements._hours_text.innerText = this._hour_id[1];
+		}
 	},
 
 
 	/**
  * input of received data
- * @param {Object} than - this Object
  */
 
-	enterData: function enterData(than) {
-		var now = new Date();
-		var date = than.formatTime(now.getHours()) + ':' + than.formatTime(now.getMinutes()) + ':' + than.formatTime(now.getSeconds());
-		var obj = 'number=' + than.Number + '&name=' + than.Name + '&hours=' + than.Hours + '&date=' + date;
+	enterData: function enterData() {
+		this.format_time(this.Hours);
 
-		than.controller.enterData(than.Number, than.Name, than.Hours);
+		var now = new Date();
+		var time = this.formatTime(now.getHours()) + ':' + this.formatTime(now.getMinutes()) + ':' + this.formatTime(now.getSeconds());
+		var date = now.getDay() + '/' + now.getMonth() + '/' + now.getFullYear();
+
+		var obj = 'number=' + this.Number + '&name=' + this.Name + '&hours=' + this.Hours + '&date=' + date + '&time=' + time;
+
+		this.controller.enterData(this.Number, this.Name, this.Hours);
 
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', '../php/add_client.php', true);
@@ -258,23 +320,22 @@ AddClient.prototype = {
  * checking the entered name
  * @param 
  * name - enter the name
- * than - this object
  */
 
-	format_name: function format_name(name, than) {
+	format_name: function format_name(name) {
 		var text = name;
 
 		if (text.match(/[^A-Za-zА-Яа-яЁё,. 0-9]/g)) {
 			text = text.replace(/[^A-Za-zА-Яа-яЁё,. 0-9]/g, '');
 		}
 
-		if (text.length > than._elements._name.maxlength) {
-			text = text.slice(0, than._elements._name.maxlength);
+		if (text.length > this._elements._name.maxlength) {
+			text = text.slice(0, this._elements._name.maxlength);
 		}
 
-		than.Name = text;
+		this.Name = text;
 
-		than._elements._name.value = than.Name;
+		this._elements._name.value = this.Name;
 	},
 
 
@@ -282,28 +343,27 @@ AddClient.prototype = {
  * checking the entered time
  * @param 
  * time - enter the time
- * than - this object
  */
 
-	format_time: function format_time(time, than) {
+	format_time: function format_time(time) {
 		var text = time;
 
 		if (!Number(text)) {
-			text = text.replace(/[^0-9 ]/g, '');
+			text = text.toString().replace(/[^0-9 ]/g, '');
 		}
 
 		text = +text;
 
-		if (text && text > than._elements._hours.max) {
-			text = than._elements._hours.max;
+		if (text > this._elements._hours.max) {
+			text = this._elements._hours.max;
 		}
-		if (text && text < than._elements._hours.min) {
-			text = than._elements._hours.min;
+		if (text < this._elements._hours.min) {
+			text = this._elements._hours.min;
 		}
 
-		than.Hours = text;
+		this.Hours = text;
 
-		than._elements._hours.value = than.Hours;
+		this._elements._hours.value = this.Hours;
 	},
 
 
@@ -315,136 +375,5 @@ AddClient.prototype = {
 
 	formatTime: function formatTime(n) {
 		return n > 9 ? n : '0' + n;
-	},
-
-
-	/**
- * @param
- * {Object} body - block to which this element is generated
- * {String} type - element's type
- * {String} className - list of the element's classes
- * {String} id - element's id
- * {String} text - text in element
- * {String} html_text - html markup inside the element
- * {Boolean} generate - generated under certain condition
- * {Object} elements - child elements
- * {Object} save - saving element
- * {String} label_for - input id for which the label is created
- * {String} input_type - input type
- * {Number} input_min - min numeric value input (type="number")
- * {Number} input_max - max numeric value input (type="number")
- * {Number} maxlength - max length value input (type="text")
- * {String} value - element's value
- ** @param
- ** {Boolean} active - presence of event listeners
- ** {String} name - name to save
- * {Object} on - event listeners
- ** @param
- ** {Boolean} active - presence of event listeners
- ** {String} type - type of event listener
- ** {Boolean} param - whether the function takes arguments
- ** {Function} callback - callback function
- */
-
-	createElement: function createElement() {
-		var _this = this;
-
-		var body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document.querySelector('body');
-		var _ref = arguments[1];
-		var _ref$type = _ref.type,
-		    type = _ref$type === undefined ? 'div' : _ref$type,
-		    className = _ref.className,
-		    id_element = _ref.id_element,
-		    text = _ref.text,
-		    html_text = _ref.html_text,
-		    label_for = _ref.label_for,
-		    _ref$input_type = _ref.input_type,
-		    input_type = _ref$input_type === undefined ? 'text' : _ref$input_type,
-		    _ref$input_min = _ref.input_min,
-		    input_min = _ref$input_min === undefined ? 0 : _ref$input_min,
-		    _ref$input_max = _ref.input_max,
-		    input_max = _ref$input_max === undefined ? 999 : _ref$input_max,
-		    maxlength = _ref.maxlength,
-		    value = _ref.value,
-		    _ref$generate = _ref.generate,
-		    generate = _ref$generate === undefined ? true : _ref$generate,
-		    _ref$save = _ref.save,
-		    save = _ref$save === undefined ? {
-			active: false,
-			name: undefined
-		} : _ref$save,
-		    _ref$on = _ref.on,
-		    on = _ref$on === undefined ? {
-			active: false,
-			param: false,
-			type: undefined,
-			callback: undefined
-		} : _ref$on,
-		    elements = _ref.elements;
-
-		if (generate) {
-			var elem = document.createElement(type);
-
-			if (className) elem.className = className;
-			if (id_element) elem.id = id_element;
-			if (text) elem.innerText = text;
-			if (html_text) elem.innerHTML = html_text;
-			if (input_type) elem.type = input_type;
-			if (input_min) elem.min = input_min;
-			if (input_max) elem.max = input_max;
-			if (value) elem.value = value;
-			if (maxlength) elem.setAttribute('maxlength', maxlength);
-			if (label_for) elem.setAttribute('for', label_for);
-
-			if (save.active) {
-				if (!this._elements) this._elements = {};
-				this._elements[save.name] = elem;
-			}
-
-			if (on.active) {
-				if (on.param) {
-					elem.addEventListener(on.type, function (e) {
-						return on.callback(e, _this);
-					});
-				} else {
-					elem.addEventListener(on.type, function () {
-						return on.callback(_this);
-					});
-				}
-			}
-
-			if (elements) {
-				if (elements instanceof Array) {
-					var _iteratorNormalCompletion = true;
-					var _didIteratorError = false;
-					var _iteratorError = undefined;
-
-					try {
-						for (var _iterator = elements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-							var elems = _step.value;
-
-							this.createElement(elem, elems);
-						}
-					} catch (err) {
-						_didIteratorError = true;
-						_iteratorError = err;
-					} finally {
-						try {
-							if (!_iteratorNormalCompletion && _iterator.return) {
-								_iterator.return();
-							}
-						} finally {
-							if (_didIteratorError) {
-								throw _iteratorError;
-							}
-						}
-					}
-				} else {
-					this.createElement(elem, elements);
-				}
-			}
-
-			body.appendChild(elem);
-		}
 	}
 };

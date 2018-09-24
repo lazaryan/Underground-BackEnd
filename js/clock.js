@@ -57,8 +57,8 @@ Clock.prototype = {
 		this.minutes = Math.floor(seconds / 60) % 60;
 		this.hours = Math.floor(seconds / 3600);
 	},
-	getHours: function getHours(hours) {
-		this.hours = +this.hours + hours;
+	changeHours: function changeHours(hours) {
+		this.hours = +hours;
 	},
 
 
@@ -95,6 +95,12 @@ Clock.prototype = {
 		this.minutes = 0;
 		this.hours = 0;
 		this.second = 0;
+	},
+	addHours: function addHours(hours) {
+		this.hours = +this.hours + +hours;
+	},
+	getMinutes: function getMinutes() {
+		return +this.hours * 60 + +this.minutes;
 	},
 
 

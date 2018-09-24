@@ -66,57 +66,48 @@ Tabel.prototype = {
 			cap: {
 				setting: {
 					type: 'button',
-					className: 'table__cap',
+					save_name: '_cap',
 					text: '\u0421\u0442\u043E\u043B \u2116 ' + this.Number,
 					generate: !this._active,
-					save: {
-						active: true,
-						name: '_cap'
-					},
-					on: {
-						active: true,
-						type: 'click',
-						callback: this.showPopup
-					}
+					attr: { class: 'table__cap' },
+					on: { 'click': this.showPopup.bind(this) }
 				}
 			},
 			title: {
 				setting: {
-					className: 'table__title',
-					text: '\u0421\u0442\u043E\u043B \u2116 ' + this.number
+					text: '\u0421\u0442\u043E\u043B \u2116 ' + this.number,
+					attr: { class: 'table__title' }
 				}
 			},
 			information: {
 				setting: {
-					className: 'table__information',
+					attr: { class: 'table__information' },
 					elements: [{
-						className: 'information__field',
+						attr: { class: 'information__field' },
 						elements: [{
-							className: 'information__title',
-							text: 'Клиент'
+							text: 'Клиент',
+							attr: { class: 'information__title' }
 						}, {
 							type: 'span',
-							className: 'information__value',
-							id: this.Number + '_name',
+							save_name: '_name',
 							text: this.Name,
-							save: {
-								active: true,
-								name: '_name'
+							attr: {
+								class: 'information__value',
+								id: this.Number + '_name'
 							}
 						}]
 					}, {
-						className: 'information__field',
+						attr: { class: 'information__field' },
 						elements: [{
-							className: 'information__title',
-							text: 'Таймер'
+							text: 'Таймер',
+							attr: { class: 'information__title' }
 						}, {
 							type: 'span',
-							className: 'information__value',
-							id: this.Number + '_timer',
-							text: '00:00',
-							save: {
-								active: true,
-								name: '_timer'
+							text: '00:00:00',
+							save_name: '_timer',
+							attr: {
+								class: 'information__value',
+								id: this.Number + '_timer'
 							}
 						}]
 					}]
@@ -124,88 +115,47 @@ Tabel.prototype = {
 			},
 			change: {
 				setting: {
-					className: 'table__change',
+					attr: { class: 'table__change' },
 					elements: [{
 						type: 'div',
-						className: 'information__checked',
+						save_name: '_add_hours_block',
+						attr: { class: 'information__checked', id: 'hours_block' },
 						elements: [{
 							type: 'button',
-							className: 'information__button',
-							text: 'Добавить',
-							save: {
-								active: true,
-								name: '_add_hours'
-							},
-							on: {
-								active: true,
-								type: 'click',
-								callback: this.showAddHours
-							}
+							text: 'Изменить',
+							save_name: '_add_hours',
+							attr: { class: 'information__button information__button_absolute' },
+							on: { 'click': this.showAddHours.bind(this) }
 						}, {
-							type: 'div',
-							className: 'information__add-hours',
-							style: 'transform: scaleY(0)',
-							save: {
-								active: true,
-								name: '_add_hours_checked'
-							},
+							save_name: '_add_hours_input',
+							attr: { class: 'information__button information__button_col_transp information__button_flex' },
 							elements: [{
-								type: 'button',
-								className: 'information__button',
-								text: '1 час',
-								data: [{
-									name: 'value',
-									value: 1
-								}],
+								type: 'input',
+								save_name: '_add_hours_value',
+								attr: {
+									class: 'information__input-hours',
+									type: 'number',
+									min: this.controller.setting.hours.min,
+									max: this.controller.setting.hours.max,
+									value: this.Hours
+								},
 								on: {
-									active: true,
-									type: 'click',
-									param: true,
-									callback: this.addHours
+									'input': this.inputHours.bind(this),
+									'keyup': this.checkEnter.bind(this)
 								}
 							}, {
 								type: 'button',
-								className: 'information__button',
-								text: '2 часа',
-								data: [{
-									name: 'value',
-									value: 2
-								}],
-								on: {
-									active: true,
-									type: 'click',
-									param: true,
-									callback: this.addHours
-								}
-							}, {
-								type: 'button',
-								className: 'information__button',
-								text: '3 часа',
-								data: [{
-									name: 'value',
-									value: 3
-								}],
-								on: {
-									active: true,
-									type: 'click',
-									param: true,
-									callback: this.addHours
-								}
+								text: 'Изменить',
+								attr: { class: 'information__button-hours' },
+								on: { 'click': this.changeHours.bind(this) }
 							}]
 						}]
 					}, {
 						type: 'button',
-						className: 'information__button',
 						text: 'Убрать',
-						save: {
-							active: true,
-							name: '_add_remove'
-						},
-						on: {
-							active: true,
-							type: 'click',
-							callback: this.showPay
-						}
+						save_name: '_add_remove',
+						attr: { class: 'information__button' },
+						on: { 'click': this.showPay.bind(this) }
 					}]
 				}
 			}
@@ -257,14 +207,18 @@ Tabel.prototype = {
  */
 
 	createTable: function createTable() {
+		var _this = this;
+
 		this.Body = document.createElement('div');
 		this.Body.className = 'table';
 		this.Body.id = this.id;
 
 		if (this._create) {
-			for (var elem in this._create) {
-				this.createElement(this.Body, this._create[elem].setting);
-			}
+			Object.keys(this._create).map(function (el) {
+				return _this._create[el];
+			}).forEach(function (el) {
+				createElement(_this.Body, el.setting, _this._elements);
+			});
 		}
 	},
 
@@ -303,12 +257,10 @@ Tabel.prototype = {
 
 	/**
  * method of creating a window for adding visitor's data
- * @param {Object} than - this object
  */
 
-	showPopup: function showPopup(than) {
-
-		than.controller.showAddClient(than.Number);
+	showPopup: function showPopup() {
+		this.controller.showAddClient(this.Number);
 	},
 
 
@@ -319,7 +271,8 @@ Tabel.prototype = {
 	addCap: function addCap() {
 		this._create.cap.setting.generate = true;
 		this._active = false;
-		this.createElement(this.Body, this._create.cap.setting);
+
+		createElement(this.Body, this._create.cap.setting, this._elements);
 	},
 
 
@@ -367,18 +320,17 @@ Tabel.prototype = {
 
 	/**
  * method to display the price on the screen
- * @param {Object} than - this Object
  */
 
-	showPay: function showPay(than) {
-		var obj = 'number=' + than.Number;
+	showPay: function showPay() {
+		this.controller.showPay(this.Number, this.Hours, this.prise);
 
-		than.controller.showPay(than.Number, than.Hours, than.prise);
-
-		if (than._active_add_hours) {
-			than._elements._add_hours_checked.setAttribute('style', 'transform: scaleY(0)');
-			than._active_add_hours = false;
+		if (!this._elements._add_hours) {
+			this.addHoursCap();
 		}
+	},
+	sendClient: function sendClient(prise) {
+		var obj = 'number=' + this.Number + '&prise=' + prise.toFixed(1);
 
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', '../php/remove_client.php', true);
@@ -403,23 +355,36 @@ Tabel.prototype = {
 	changeTimer: function changeTimer(time) {
 		this._elements._timer.innerText = time;
 	},
-	showAddHours: function showAddHours(than) {
-		than._active_add_hours = !than._active_add_hours;
-		if (than._active_add_hours) {
-			than._elements._add_hours_checked.setAttribute('style', 'transform: scaleY(1)');
-		} else {
-			than._elements._add_hours_checked.setAttribute('style', 'transform: scaleY(0)');
-		}
+	showAddHours: function showAddHours() {
+		this.removeHoursCap();
+
+		this._elements._add_hours_value.value = this.Hours;
+
+		this._elements._add_hours_value.focus();
 	},
-	addHours: function addHours(e, than) {
-		var value = e.target.dataset.value;
-		than.showAddHours(than);
-		than.Hours = +than.Hours + +value;
+	removeHoursCap: function removeHoursCap() {
+		this.Body.querySelector('#hours_block').removeChild(this._elements._add_hours);
 
+		this._elements._add_hours = undefined;
+	},
+	addHoursCap: function addHoursCap() {
+		createElement(this._elements._add_hours_block, this._create.change.setting.elements[0].elements[0], this._elements);
+	},
+	changeHours: function changeHours() {
+		this.addHoursCap();
 
-		than.controller.addHours(than.number, +value);
+		var hours = this.format_time(this._elements._add_hours_value.value);
 
-		var obj = 'number=' + than.Number + '&value=' + +than.Hours;
+		if (hours == this.Hours) return;
+
+		this.controller.changeHours(this.number, +hours - this.Hours);
+
+		this.changeTime(hours);
+
+		this.sendNewHours();
+	},
+	sendNewHours: function sendNewHours() {
+		var obj = 'number=' + this.Number + '&value=' + this.Hours;
 
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', '../php/add_hour.php', true);
@@ -434,122 +399,40 @@ Tabel.prototype = {
 			}
 		};
 	},
-
-
-	/**
- * @param
- * {Object} body - block to which this element is generated
- * {String} type - element's type
- * {String} className - list of the element's classes
- * {String} id - element's id
- * {String} text - text in element
- * {String} html_text - html markup inside the element
- * {Boolean} generate - generated under certain condition
- * {Object} elements - child elements
- * {Object} save - saving element
- ** @param
- ** {Boolean} active - presence of event listeners
- ** {String} name - name to save
- * {Object} on - event listeners
- ** @param
- ** {Boolean} active - presence of event listeners
- ** {String} type - type of event listener
- ** {Boolean} param - whether the function takes arguments
- ** {Function} callback - callback function
- */
-
-	createElement: function createElement() {
-		var _this = this;
-
-		var body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document.querySelector('body');
-		var _ref2 = arguments[1];
-		var _ref2$type = _ref2.type,
-		    type = _ref2$type === undefined ? 'div' : _ref2$type,
-		    className = _ref2.className,
-		    id = _ref2.id,
-		    text = _ref2.text,
-		    html_text = _ref2.html_text,
-		    style = _ref2.style,
-		    data = _ref2.data,
-		    _ref2$generate = _ref2.generate,
-		    generate = _ref2$generate === undefined ? true : _ref2$generate,
-		    _ref2$save = _ref2.save,
-		    save = _ref2$save === undefined ? {
-			active: false,
-			name: undefined
-		} : _ref2$save,
-		    _ref2$on = _ref2.on,
-		    on = _ref2$on === undefined ? {
-			active: false,
-			param: false,
-			type: undefined,
-			callback: undefined
-		} : _ref2$on,
-		    elements = _ref2.elements;
-
-		if (generate) {
-			var elem = document.createElement(type);
-
-			if (className) elem.className = className;
-			if (id) elem.id = id;
-			if (text) elem.innerText = text;
-			if (html_text) elem.innerHTML = html_text;
-			if (style) elem.setAttribute('style', style);
-			if (data) {
-				data.forEach(function (el) {
-					elem.dataset[el.name] = el.value;
-				});
-			}
-
-			if (save.active) {
-				if (!this._elements) this._elements = {};
-				this._elements[save.name] = elem;
-			}
-
-			if (on.active) {
-				if (on.param) {
-					elem.addEventListener(on.type, function (e) {
-						return on.callback(e, _this);
-					});
-				} else {
-					elem.addEventListener(on.type, function () {
-						return on.callback(_this);
-					});
-				}
-			}
-
-			if (elements) {
-				if (elements instanceof Array) {
-					var _iteratorNormalCompletion = true;
-					var _didIteratorError = false;
-					var _iteratorError = undefined;
-
-					try {
-						for (var _iterator = elements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-							var elems = _step.value;
-
-							this.createElement(elem, elems);
-						}
-					} catch (err) {
-						_didIteratorError = true;
-						_iteratorError = err;
-					} finally {
-						try {
-							if (!_iteratorNormalCompletion && _iterator.return) {
-								_iterator.return();
-							}
-						} finally {
-							if (_didIteratorError) {
-								throw _iteratorError;
-							}
-						}
-					}
-				} else {
-					this.createElement(elem, elements);
-				}
-			}
-
-			body.appendChild(elem);
+	inputHours: function inputHours(e) {
+		this.format_time(e.target.value);
+	},
+	checkEnter: function checkEnter(e) {
+		if (e.code == 'Enter' && this.Name) {
+			this.changeHours();
 		}
+	},
+	format_time: function format_time(time) {
+		var text = time;
+
+		if (!Number(text)) {
+			text = text.toString().replace(/[^0-9 ]/g, '');
+		}
+
+		text = +text;
+
+		if (text > this._elements._add_hours_value.max) {
+			text = this._elements._add_hours_value.max;
+		}
+
+		if (text < this.Hours) {
+			text = this.Hours;
+		}
+
+		if (text < this._elements._add_hours_value.min) {
+			text = this._elements._add_hours_value.min;
+		}
+
+		this._elements._add_hours_value.value = text;
+
+		return text;
+	},
+	changeTime: function changeTime(text) {
+		this.Hours = text;
 	}
 };
