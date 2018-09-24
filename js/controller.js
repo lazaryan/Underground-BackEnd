@@ -132,7 +132,7 @@ Controller.prototype = {
 		this.showPay(number, hours, prise);
 	},
 	changeHours: function changeHours(number, hours) {
-		this.clock[number].changeHours(hours);
+		this.clock[number].addHours(hours);
 		this.tabels[number].changeTimer(this.clock[number].getTime());
 	},
 	addHours: function addHours(number, hours) {
