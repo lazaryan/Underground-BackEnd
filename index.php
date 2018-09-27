@@ -1,8 +1,8 @@
 <?php
 $db_host     = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name     = "unced";
+$db_username = "f0237105_Table1";
+$db_password = "1234";
+$db_name     = "f0237105_Table";
 $db_charset  = "utf8";
 
 $con = mysql_connect($db_host, $db_username, $db_password);
@@ -13,7 +13,7 @@ if (!$con || !$db) {
   mysql_error();
 }
 
-$result = mysql_query("SELECT * FROM unced");
+$result = mysql_query("SELECT * FROM `table`");
 
 $i=0;
 while ($row = mysql_fetch_array($result))
@@ -53,10 +53,11 @@ while ($row = mysql_fetch_array($result))
 </head>
 <body class="body">
     <!--Основа сайта-->
+    <header class="header">
+        <a href="./otchet.php" target="_blank" class="header__link">Отчет</a>
+    </header>
     <div class="content" id="content">
-        <header class="header">
-            <a href="./report.html" target="_blank" class="header__link">Отчет</a>
-        </header>
+       
     </div>	
     <!--Скрипты-->
     <script src="js/create_object.js"></script>

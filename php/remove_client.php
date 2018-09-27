@@ -1,8 +1,8 @@
 <?php 
 $db_host     = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name     = "unced";
+$db_username = "f0237105_Table1";
+$db_password = "1234";
+$db_name     = "f0237105_Table";
 $db_charset  = "utf8";
 
 $con = mysql_connect($db_host, $db_username, $db_password);
@@ -14,18 +14,16 @@ if (!$con || !$db) {
 }
 
 $number= strip_tags(trim($_POST['number']));
-
-$result = mysql_query("SELECT * FROM unced WHERE id=$number");
+$sum=strip_tags(trim($_POST['prise']));
+$result = mysql_query("SELECT * FROM `table` WHERE id=$number");
 
 $row = mysql_fetch_array($result);
 $name=$row['person'];
 $time=$row['time'];
-$timestatus=$row['timestatus'];
-$prise=$row['prise'];
-$sum=$timestatus*$prise;
+$date=$row['date'];
 
-mysql_query(" INSERT INTO Otchet (person, time, summa) VALUES ('$name','$time', $sum)");
+mysql_query(" INSERT INTO `otchet` (person, time, summa, date) VALUES ('$name','$time', $sum, '$date')");
 
-mysql_query("UPDATE unced SET person=null, time=null, timestatus=0 WHERE id=$number");
+mysql_query("UPDATE `table` SET person=null, time=null, timestatus=0, date=null WHERE id=$number");
 mysql_close();
 ?>

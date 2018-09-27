@@ -295,7 +295,7 @@ AddClient.prototype = {
 
 		var now = new Date();
 		var time = this.formatTime(now.getHours()) + ':' + this.formatTime(now.getMinutes()) + ':' + this.formatTime(now.getSeconds());
-		var date = now.getDay() + '/' + now.getMonth() + '/' + now.getFullYear();
+		var date = now.getDate() + '/' + (+now.getMonth() + +1) + '/' + now.getFullYear();
 
 		var obj = 'number=' + this.Number + '&name=' + this.Name + '&hours=' + this.Hours + '&date=' + date + '&time=' + time;
 
